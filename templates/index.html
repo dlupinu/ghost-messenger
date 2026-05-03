@@ -11,15 +11,15 @@
             overflow-x: hidden; 
             font-family: 'Courier New', monospace; 
             color: #00ff41; 
-            /* Sfondo Anonymous sotto tutto */
-            background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://i.imgur.com/K6Y0Fsh.png');
-            background-size: contain;
+            /* Sfondo Anonymous corretto */
+            background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://wallpaperaccess.com/full/11252.jpg');
+            background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
             background-attachment: fixed;
         }
         
-        #matrix-canvas { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.8; }
+        #matrix-canvas { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.6; }
 
         .main-container { 
             position: relative; 
@@ -33,27 +33,26 @@
             box-sizing: border-box;
         }
 
-        /* Container Titolo con sfondo nero e loghi */
         .header-box {
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             border: 2px solid #00ff41;
-            padding: 20px 40px;
+            padding: 20px 50px;
             border-radius: 10px;
             display: flex;
             align-items: center;
             gap: 25px;
             margin-bottom: 50px;
-            box-shadow: 0 0 25px rgba(0, 255, 65, 0.5);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.6);
         }
 
         .hacker-icon {
-            font-size: 3.5em;
-            text-shadow: 0 0 15px #00ff41;
+            font-size: 3em;
+            filter: drop-shadow(0 0 10px #00ff41);
         }
 
         h1 { 
-            font-size: 3.5em; 
-            letter-spacing: 8px; 
+            font-size: 3.2em; 
+            letter-spacing: 12px; 
             text-shadow: 0 0 20px #00ff41; 
             margin: 0;
             text-align: center;
@@ -64,15 +63,15 @@
             justify-content: center; 
             gap: 40px; 
             width: 100%;
-            max-width: 1200px;
+            max-width: 1100px;
         }
 
         .box { 
-            background: rgba(0, 10, 0, 0.92); 
+            background: rgba(0, 15, 0, 0.95); 
             border: 2px solid #00ff41; 
             padding: 40px; 
-            border-radius: 15px; 
-            box-shadow: 0 0 30px rgba(0, 255, 65, 0.3); 
+            border-radius: 20px; 
+            box-shadow: 0 0 40px rgba(0, 255, 65, 0.2); 
             width: 450px; 
             box-sizing: border-box;
         }
@@ -101,11 +100,11 @@
             width: 100%; 
             font-size: 1.2em;
             transition: 0.3s; 
-            border-radius: 5px; 
+            border-radius: 8px; 
             text-transform: uppercase;
         }
         
-        button:hover { background: #00cc33; transform: scale(1.02); box-shadow: 0 0 20px #00ff41; }
+        button:hover { background: #00cc33; transform: scale(1.02); box-shadow: 0 0 25px #00ff41; }
 
         .btn-small { background: #1a1a1a; color: #00ff41; font-size: 0.9em; width: auto; padding: 10px 20px; border: 1px solid #00ff41; margin-top: 15px; }
 
@@ -116,68 +115,58 @@
             margin-top: 20px; 
             padding: 15px; 
             border: 1px dashed #ff00ea; 
-            background: rgba(20,0,20,0.7); 
-        }
-
-        @media (max-width: 900px) {
-            .header-box { flex-direction: column; padding: 15px; gap: 10px; }
-            h1 { font-size: 2em; letter-spacing: 3px; }
-            .hacker-icon { font-size: 2.5em; }
-            .flex-wrapper { flex-direction: column; align-items: center; gap: 30px; }
-            .box { width: 100%; max-width: 400px; padding: 25px; }
+            background: rgba(40,0,40,0.4); 
         }
 
         .virus-alert { position: fixed; width: 250px; height: 150px; background: #ccc; border: 2px solid #000; color: #000; padding: 10px; box-shadow: 5px 5px 0px #444; z-index: 10000; display: none; font-family: "Tahoma", sans-serif; }
         .virus-header { background: #000080; color: white; padding: 2px 5px; font-weight: bold; font-size: 12px; margin: -10px -10px 10px -10px; display: flex; justify-content: space-between; }
+
+        @media (max-width: 900px) {
+            h1 { font-size: 1.8em; letter-spacing: 4px; }
+            .header-box { padding: 15px 20px; gap: 10px; }
+            .flex-wrapper { flex-direction: column; align-items: center; }
+            .box { width: 100%; }
+        }
     </style>
 </head>
 <body>
     <canvas id="matrix-canvas"></canvas>
 
+    <!-- Audio Allarme -->
+    <audio id="alarm-sound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto" loop></audio>
+
     <div class="main-container">
-        <!-- HEADER CON LOGHI E SFONDO -->
+        <!-- HEADER SOLO CON TESCHI -->
         <div class="header-box">
-            <span class="hacker-icon">🥷</span>
+            <span class="hacker-icon">💀</span>
             <h1>GHOST MESSENGER</h1>
             <span class="hacker-icon">💀</span>
         </div>
         
         <div class="flex-wrapper">
-            <!-- BOX CRIPTAZIONE -->
             <div class="box">
                 <h3>LOCK MESSAGE 🔒</h3>
                 <form action="/encrypt" method="post" autocomplete="off">
-                    <input type="text" style="display:none" name="fake_user">
                     <input type="text" name="message" placeholder="Messaggio segreto..." required autocomplete="off">
                     <input type="text" name="psw" placeholder="Password sblocco..." required 
                            onfocus="this.type='password'; this.removeAttribute('readonly');" readonly>
-                    
                     <select name="expiry">
                         <option value="1">Scadenza: 1 Ora</option>
                         <option value="24">Scadenza: 24 Ore</option>
                     </select>
                     <button type="submit">GENERA CODICE</button>
                 </form>
-                {% if encrypted %}
-                    <div class="result" id="res-enc">{{ encrypted }}</div>
-                    <button class="btn-small" onclick="copyText('res-enc')">📋 COPIA CODICE</button>
-                {% endif %}
             </div>
 
-            <!-- BOX DECRIPTAZIONE -->
             <div class="box">
                 <h3>UNLOCK MESSAGE 🔓</h3>
                 <form action="/decrypt" method="post" autocomplete="off">
                     <input type="text" id="input-decrypt" name="code" placeholder="Incolla codice qui..." required autocomplete="off">
                     <input type="text" name="psw" placeholder="Password..." required 
                            onfocus="this.type='password'; this.removeAttribute('readonly');" readonly>
-                    
                     <button type="submit" style="background:#111; color:#00ff41; border:2px solid #00ff41;">SBLOCCA</button>
                     <button class="btn-small" type="button" onclick="pasteText()" style="width:100%">📥 INCOLLA</button>
                 </form>
-                {% if decrypted %}
-                    <div class="result" style="color:#00ff41; border-color:#00ff41;">{{ decrypted }}</div>
-                {% endif %}
             </div>
         </div>
     </div>
@@ -186,10 +175,7 @@
         // Matrix Effect
         const canvas = document.getElementById('matrix-canvas');
         const ctx = canvas.getContext('2d');
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
         window.addEventListener('resize', resize);
         resize();
 
@@ -207,33 +193,25 @@
         }
         setInterval(draw, 35);
 
-        // Clipboard functions
-        function copyText(id) {
-            const text = document.getElementById(id).innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                const btn = event.target;
-                btn.innerText = "✅ COPIATO!";
-                setTimeout(() => { btn.innerText = "📋 COPIA CODICE"; }, 2000);
-            });
-        }
-
+        // Clipboard
         async function pasteText() {
             try {
                 const text = await navigator.clipboard.readText();
                 document.getElementById('input-decrypt').value = text;
-            } catch (err) {
-                alert("Permesso negato. Incolla manualmente.");
-            }
+            } catch (err) { alert("Incolla manualmente."); }
         }
 
-        // Simulata Virus (come nel tuo originale)
+        // TRIGGER VIRUS + ALLARME
         function triggerVirus() {
-            document.querySelector('.main-container').style.filter = 'blur(5px)';
+            const alarm = document.getElementById('alarm-sound');
+            alarm.play().catch(e => console.log("Audio bloccato. Clicca sulla pagina per permettere i suoni."));
+            
+            document.querySelector('.main-container').style.filter = 'blur(6px)';
             let count = 0;
             const interval = setInterval(() => {
-                if(count > 40) {
+                if(count > 45) {
                     clearInterval(interval);
-                    setTimeout(() => { window.location.href = "https://www.google.com"; }, 1500);
+                    setTimeout(() => { window.location.href = "https://www.google.com"; }, 2000);
                     return;
                 }
                 const win = document.createElement('div');
@@ -241,12 +219,13 @@
                 win.style.display = 'block';
                 win.style.left = Math.random() * (window.innerWidth - 250) + 'px';
                 win.style.top = Math.random() * (window.innerHeight - 150) + 'px';
-                win.innerHTML = `<div class="virus-header"><span>System Error</span><span>X</span></div>
-                                 <p style="text-align:center; margin-top:20px;">⚠️<br><b>ACCESSO SCADUTO</b></p>`;
+                win.innerHTML = `<div class="virus-header"><span>Critical System Failure</span><span>X</span></div>
+                                 <p style="text-align:center; margin-top:20px;">⚠️<br><b>ACCESSO NON AUTORIZZATO</b></p>`;
                 document.body.appendChild(win);
                 count++;
-            }, 120);
+            }, 100);
         }
+        
         setTimeout(triggerVirus, 60000);
     </script>
 </body>
