@@ -15,7 +15,7 @@ cipher = Fernet(key)
 def home():
     return render_template('index.html')
 
-# --- CRIPTAZIONE TESTO (Già esistente) ---
+# --- 1. GESTIONE TESTO (Copia/Incolla) ---
 @app.route('/encrypt', methods=['POST'])
 def encrypt_msg():
     msg = request.form.get('message', '')
@@ -24,42 +24,51 @@ def encrypt_msg():
         return render_template('index.html', encrypted=encrypted)
     return render_template('index.html')
 
-# --- NOVITÀ: CRIPTAZIONE IMMAGINE ---
+# --- 2. GESTIONE FILE (Download .ghost) ---
 @app.route('/encrypt_file', methods=['POST'])
 def encrypt_file():
     file = request.files.get('file')
     if file:
         file_data = file.read()
-        # Criptiamo i byte dell'immagine
+        # Criptiamo i byte originali
         encrypted_data = cipher.encrypt(file_data)
-        # Trasformiamo i byte criptati in una stringa leggibile (Base64)
-        encoded_text = base64.b64encode(encrypted_data).decode()
-        return render_template('index.html', encrypted=encoded_text, is_file=True)
+        
+        # Inviamo il file criptato come download
+        return send_file(
+            io.BytesIO(encrypted_data),
+            mimetype='application/octet-stream',
+            as_attachment=True,
+            download_name="messaggio_segreto.ghost"
+        )
     return render_template('index.html')
 
+# --- 3. DECRIPTA TUTTO (Testo o File) ---
 @app.route('/decrypt', methods=['POST'])
 def decrypt_msg():
+    # Prova prima a vedere se l'utente ha caricato un file .ghost
+    file = request.files.get('file_to_decrypt')
     code = request.form.get('code', '')
-    if code:
-        try:
-            # Decodifichiamo il Base64 e poi decriptiamo con Fernet
-            decrypted_data = cipher.decrypt(base64.b64decode(code.encode()))
+
+    try:
+        if file and file.filename != '':
+            # Decripta il FILE
+            encrypted_data = file.read()
+            decrypted_data = cipher.decrypt(encrypted_data)
+            return send_file(
+                io.BytesIO(decrypted_data),
+                mimetype='application/octet-stream',
+                as_attachment=True,
+                download_name="file_sbloccato.png" # Puoi rinominarlo dopo
+            )
+        
+        elif code:
+            # Decripta il TESTO (Base64)
+            decrypted_data = cipher.decrypt(code.encode()).decode()
+            return render_template('index.html', decrypted=decrypted_data)
             
-            # Se i primi byte sembrano un'immagine, la rimandiamo come file
-            # Altrimenti la trattiamo come testo
-            try:
-                text_msg = decrypted_data.decode('utf-8')
-                return render_template('index.html', decrypted=text_msg)
-            except:
-                # Se non è testo, è un'immagine! La mandiamo al browser
-                return send_file(
-                    io.BytesIO(decrypted_data),
-                    mimetype='image/png',
-                    as_attachment=True,
-                    download_name="ghost_image.png"
-                )
-        except Exception as e:
-            return render_template('index.html', decrypted=f"ERRORE: Codice non valido! {str(e)}")
+    except Exception as e:
+        return render_template('index.html', decrypted="ERRORE: Chiave errata o file corrotto!")
+    
     return render_template('index.html')
 
 if __name__ == '__main__':
