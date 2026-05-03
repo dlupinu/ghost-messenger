@@ -7,7 +7,6 @@
         body { background-color: #000; margin: 0; overflow: hidden; font-family: 'Courier New', monospace; color: #00ff41; }
         #matrix-canvas { position: fixed; top: 0; left: 0; z-index: -1; }
         
-        /* Layout affiancato */
         .main-container { position: relative; z-index: 1; padding: 20px; text-align: center; }
         .flex-wrapper { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 20px; }
         
@@ -23,6 +22,7 @@
         h1 { font-size: 1.5em; letter-spacing: 5px; text-shadow: 0 0 10px #00ff41; }
         h3 { font-size: 0.9em; margin-bottom: 15px; color: #aaa; }
 
+        /* Anti-suggerimento: stile per i campi input */
         input, select { 
             background: #000; border: 1px solid #00ff41; color: #00ff41; 
             padding: 10px; width: 85%; outline: none; margin-bottom: 10px; font-size: 0.8em;
@@ -35,7 +35,7 @@
         }
         button:hover { transform: scale(1.05); box-shadow: 0 0 15px #00ff41; }
 
-        .btn-small { background: #333; color: #00ff41; font-size: 0.7em; width: auto; padding: 5px 10px; margin: 5px; }
+        .btn-small { background: #333; color: #00ff41; font-size: 0.7em; width: auto; padding: 5px 10px; margin: 5px; border-radius: 3px; cursor: pointer; }
 
         .result { word-break: break-all; color: #ff00ea; font-size: 0.75em; margin-top: 10px; padding: 10px; border: 1px dashed #ff00ea; background: rgba(20,0,20,0.5); }
 
@@ -44,16 +44,16 @@
             position: fixed;
             width: 250px;
             height: 150px;
-            background: #eee;
+            background: #ccc;
             border: 2px solid #000;
             color: #000;
             padding: 10px;
-            box-shadow: 5px 5px 0px #888;
+            box-shadow: 5px 5px 0px #444;
             z-index: 10000;
             display: none;
-            font-family: "Arial", sans-serif;
+            font-family: "Tahoma", "Arial", sans-serif;
         }
-        .virus-header { background: darkblue; color: white; padding: 2px 5px; font-weight: bold; font-size: 12px; margin: -10px -10px 10px -10px; }
+        .virus-header { background: #000080; color: white; padding: 2px 5px; font-weight: bold; font-size: 12px; margin: -10px -10px 10px -10px; display: flex; justify-content: space-between; }
     </style>
 </head>
 <body>
@@ -66,9 +66,10 @@
             <!-- BOX CRIPTAZIONE -->
             <div class="box">
                 <h3>LOCK MESSAGE 🔒</h3>
-                <form action="/encrypt" method="post">
-                    <input type="text" name="message" placeholder="Messaggio segreto..." required>
-                    <input type="password" name="psw" placeholder="Password sblocco..." required>
+                <!-- autocomplete="off" impedisce a Google di suggerire i testi vecchi -->
+                <form action="/encrypt" method="post" autocomplete="off">
+                    <input type="text" name="message" placeholder="Messaggio segreto..." required autocomplete="off">
+                    <input type="password" name="psw" placeholder="Password sblocco..." required autocomplete="new-password">
                     <select name="expiry">
                         <option value="1">Scadenza: 1 Ora</option>
                         <option value="24">Scadenza: 24 Ore</option>
@@ -84,11 +85,13 @@
             <!-- BOX DECRIPTAZIONE -->
             <div class="box">
                 <h3>UNLOCK MESSAGE 🔓</h3>
-                <form action="/decrypt" method="post">
-                    <input type="text" id="input-decrypt" name="code" placeholder="Incolla codice qui..." required>
-                    <input type="password" name="psw" placeholder="Password..." required>
-                    <button class="btn-small" type="button" onclick="pasteText()">📥 INCOLLA</button>
-                    <button type="submit" style="background:#111; color:#00ff41; border:1px solid #00ff41;">SBLOCCA</button>
+                <form action="/decrypt" method="post" autocomplete="off">
+                    <input type="text" id="input-decrypt" name="code" placeholder="Incolla codice qui..." required autocomplete="off">
+                    <input type="password" name="psw" placeholder="Password..." required autocomplete="new-password">
+                    <div style="display: flex; justify-content: center; gap: 5px;">
+                        <button class="btn-small" type="button" onclick="pasteText()">📥 INCOLLA</button>
+                        <button type="submit" style="background:#111; color:#00ff41; border:1px solid #00ff41; width: 60%;">SBLOCCA</button>
+                    </div>
                 </form>
                 {% if decrypted %}
                     <div class="result" style="color:#00ff41; border-color:#00ff41;">{{ decrypted }}</div>
@@ -98,17 +101,25 @@
     </div>
 
     <script>
-        // Funzione Copia
+        // Funzione Copia migliorata
         function copyText(id) {
             const text = document.getElementById(id).innerText;
-            navigator.clipboard.writeText(text);
-            alert("Codice Copiato!");
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                const originalText = btn.innerText;
+                btn.innerText = "✅ COPIATO!";
+                setTimeout(() => { btn.innerText = originalText; }, 2000);
+            });
         }
 
         // Funzione Incolla
         async function pasteText() {
-            const text = await navigator.clipboard.readText();
-            document.getElementById('input-decrypt').value = text;
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('input-decrypt').value = text;
+            } catch (err) {
+                alert("Permesso di incolla negato dal browser");
+            }
         }
 
         // Matrix Effect
@@ -127,32 +138,45 @@
         }
         setInterval(draw, 33);
 
-        // EFFETTO VIRUS FINALE
+        // EFFETTO VIRUS FINALE (Multi-finestre)
         function triggerVirus() {
-            document.querySelector('.main-container').style.opacity = '0.1';
+            document.querySelector('.main-container').style.filter = 'blur(5px)';
+            document.querySelector('.main-container').style.pointerEvents = 'none';
+            
             let count = 0;
-            const maxWindows = 50; // Quante finestre vuoi che si aprano
+            const maxWindows = 60; // Numero di finestre "virus"
 
             const interval = setInterval(() => {
                 if(count > maxWindows) {
                     clearInterval(interval);
-                    setTimeout(() => { window.location.href = "https://www.google.com"; }, 2000);
+                    setTimeout(() => { window.location.href = "https://www.google.com"; }, 1500);
                     return;
                 }
                 
                 const win = document.createElement('div');
                 win.className = 'virus-alert';
                 win.style.display = 'block';
+                // Posizioni casuali
                 win.style.left = Math.random() * (window.innerWidth - 250) + 'px';
                 win.style.top = Math.random() * (window.innerHeight - 150) + 'px';
-                win.innerHTML = `<div class="virus-header">System Error - 0x0002846</div>
-                                 <p style="text-align:center">⚠️<br><b>IL TUO TEMPO È SCADUTO</b><br>Sessione terminata.</p>`;
+                
+                win.innerHTML = `
+                    <div class="virus-header">
+                        <span>System Error - 0x2846</span>
+                        <span>X</span>
+                    </div>
+                    <p style="text-align:center; margin-top:20px;">
+                        <span style="font-size:30px">⚠️</span><br>
+                        <b>ACCESSO SCADUTO</b><br>
+                        Il sistema si sta chiudendo...
+                    </p>`;
+                
                 document.body.appendChild(win);
                 count++;
-            }, 100); // Ne apre una ogni 100 millisecondi
+            }, 80); // Velocità di comparsa
         }
 
-        // Timer 1 Minuto
+        // Timer 1 Minuto (60 secondi)
         setTimeout(triggerVirus, 60000);
     </script>
 </body>
