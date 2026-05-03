@@ -2,24 +2,121 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ghost Messenger</title>
     <style>
-        body { background-color: #000; margin: 0; overflow: hidden; font-family: 'Courier New', monospace; color: #00ff41; }
-        #matrix-canvas { position: fixed; top: 0; left: 0; z-index: -1; }
-        .main-container { position: relative; z-index: 1; padding: 20px; text-align: center; }
-        .flex-wrapper { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 20px; }
-        .box { background: rgba(0, 5, 0, 0.9); border: 1px solid #00ff41; padding: 20px; border-radius: 10px; box-shadow: 0 0 15px rgba(0, 255, 65, 0.2); width: 350px; }
-        h1 { font-size: 1.5em; letter-spacing: 5px; text-shadow: 0 0 10px #00ff41; }
-        h3 { font-size: 0.9em; margin-bottom: 15px; color: #aaa; }
-        input, select { background: #000; border: 1px solid #00ff41; color: #00ff41; padding: 10px; width: 85%; outline: none; margin-bottom: 10px; font-size: 0.8em; }
-        button { background: #00ff41; color: #000; border: none; padding: 10px; cursor: pointer; font-weight: bold; width: 90%; transition: 0.3s; border-radius: 5px; margin-top: 5px; }
-        button:hover { transform: scale(1.05); box-shadow: 0 0 15px #00ff41; }
-        .btn-small { background: #333; color: #00ff41; font-size: 0.7em; width: auto; padding: 5px 10px; margin: 5px; border-radius: 3px; cursor: pointer; border: none; }
-        .result { word-break: break-all; color: #ff00ea; font-size: 0.75em; margin-top: 10px; padding: 10px; border: 1px dashed #ff00ea; background: rgba(20,0,20,0.5); }
+        body { 
+            background-color: #000; 
+            margin: 0; 
+            overflow-x: hidden; 
+            font-family: 'Courier New', monospace; 
+            color: #00ff41; 
+        }
         
-        /* Nasconde i campi esca */
+        #matrix-canvas { position: fixed; top: 0; left: 0; z-index: -1; }
+
+        /* Contenitore centrato verticalmente e orizzontalmente */
+        .main-container { 
+            position: relative; 
+            z-index: 1; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        h1 { 
+            font-size: 3em; 
+            letter-spacing: 10px; 
+            text-shadow: 0 0 20px #00ff41; 
+            margin-bottom: 50px; 
+            text-align: center;
+        }
+
+        /* Flexwrapper che cambia direzione su mobile */
+        .flex-wrapper { 
+            display: flex; 
+            justify-content: center; 
+            gap: 40px; 
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .box { 
+            background: rgba(0, 5, 0, 0.95); 
+            border: 2px solid #00ff41; 
+            padding: 40px; 
+            border-radius: 15px; 
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.3); 
+            width: 450px; 
+            box-sizing: border-box;
+        }
+
+        h3 { font-size: 1.2em; margin-bottom: 25px; color: #fff; text-transform: uppercase; letter-spacing: 2px; }
+
+        /* Input e select molto più grandi */
+        input, select { 
+            background: #000; 
+            border: 1px solid #00ff41; 
+            color: #00ff41; 
+            padding: 15px; 
+            width: 100%; 
+            outline: none; 
+            margin-bottom: 20px; 
+            font-size: 1.1em; 
+            box-sizing: border-box;
+        }
+
+        button { 
+            background: #00ff41; 
+            color: #000; 
+            border: none; 
+            padding: 18px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            width: 100%; 
+            font-size: 1.2em;
+            transition: 0.3s; 
+            border-radius: 5px; 
+            text-transform: uppercase;
+        }
+        
+        button:hover { background: #00cc33; transform: scale(1.02); box-shadow: 0 0 20px #00ff41; }
+
+        .btn-small { background: #1a1a1a; color: #00ff41; font-size: 0.9em; width: auto; padding: 10px 20px; border: 1px solid #00ff41; margin-top: 15px; }
+
+        .result { 
+            word-break: break-all; 
+            color: #ff00ea; 
+            font-size: 1.1em; 
+            margin-top: 20px; 
+            padding: 15px; 
+            border: 1px dashed #ff00ea; 
+            background: rgba(20,0,20,0.6); 
+        }
+        
         .ghost-input { display: none !important; }
 
+        /* ADATTAMENTO PER SMARTPHONE */
+        @media (max-width: 900px) {
+            h1 { font-size: 2em; letter-spacing: 5px; }
+            .flex-wrapper { 
+                flex-direction: column; 
+                align-items: center; 
+                gap: 30px;
+            }
+            .box { 
+                width: 100%; 
+                max-width: 400px;
+                padding: 25px;
+            }
+            .main-container { justify-content: flex-start; padding-top: 40px; }
+        }
+
+        /* Virus Alert Style */
         .virus-alert { position: fixed; width: 250px; height: 150px; background: #ccc; border: 2px solid #000; color: #000; padding: 10px; box-shadow: 5px 5px 0px #444; z-index: 10000; display: none; font-family: "Tahoma", "Arial", sans-serif; }
         .virus-header { background: #000080; color: white; padding: 2px 5px; font-weight: bold; font-size: 12px; margin: -10px -10px 10px -10px; display: flex; justify-content: space-between; }
     </style>
@@ -35,14 +132,12 @@
             <div class="box">
                 <h3>LOCK MESSAGE 🔒</h3>
                 <form action="/encrypt" method="post" autocomplete="off">
-                    <!-- Esche per ingannare l'autocompletamento -->
                     <input type="text" class="ghost-input" name="fake_user">
                     <input type="password" class="ghost-input" name="fake_pass">
                     
                     <input type="text" name="message" placeholder="Messaggio segreto..." required autocomplete="off">
                     
-                    <!-- Campo password camuffato da testo -->
-                    <input type="text" name="psw" id="psw_enc" placeholder="Password sblocco..." required 
+                    <input type="text" name="psw" placeholder="Password sblocco..." required 
                            autocomplete="one-time-code"
                            onfocus="this.type='password'; this.removeAttribute('readonly');" 
                            readonly>
@@ -63,22 +158,18 @@
             <div class="box">
                 <h3>UNLOCK MESSAGE 🔓</h3>
                 <form action="/decrypt" method="post" autocomplete="off">
-                    <!-- Altre esche -->
                     <input type="text" class="ghost-input" name="user_temp">
-                    <input type="password" class="ghost-input" name="pass_temp">
+                    <input type="password" class="ghost-input" name="fake_pass_2">
 
                     <input type="text" id="input-decrypt" name="code" placeholder="Incolla codice qui..." required autocomplete="off">
                     
-                    <!-- Campo password camuffato da testo -->
-                    <input type="text" name="psw" id="psw_dec" placeholder="Password..." required 
+                    <input type="text" name="psw" placeholder="Password..." required 
                            autocomplete="one-time-code"
                            onfocus="this.type='password'; this.removeAttribute('readonly');" 
                            readonly>
                     
-                    <div style="display: flex; justify-content: center; gap: 5px;">
-                        <button class="btn-small" type="button" onclick="pasteText()">📥 INCOLLA</button>
-                        <button type="submit" style="background:#111; color:#00ff41; border:1px solid #00ff41; width: 60%;">SBLOCCA</button>
-                    </div>
+                    <button type="submit" style="background:#111; color:#00ff41; border:2px solid #00ff41;">SBLOCCA</button>
+                    <button class="btn-small" type="button" onclick="pasteText()" style="width:100%">📥 INCOLLA</button>
                 </form>
                 {% if decrypted %}
                     <div class="result" style="color:#00ff41; border-color:#00ff41;">{{ decrypted }}</div>
@@ -102,14 +193,19 @@
                 const text = await navigator.clipboard.readText();
                 document.getElementById('input-decrypt').value = text;
             } catch (err) {
-                alert("Permesso negato");
+                alert("Permesso negato. Incolla manualmente.");
             }
         }
 
-        // Matrix Effect
         const canvas = document.getElementById('matrix-canvas');
         const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
         const drops = Array(Math.floor(canvas.width/16)).fill(1);
         function draw() {
             ctx.fillStyle = "rgba(0, 0, 0, 0.05)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -126,7 +222,7 @@
             document.querySelector('.main-container').style.filter = 'blur(5px)';
             let count = 0;
             const interval = setInterval(() => {
-                if(count > 60) {
+                if(count > 50) {
                     clearInterval(interval);
                     setTimeout(() => { window.location.href = "https://www.google.com"; }, 1500);
                     return;
@@ -140,7 +236,7 @@
                                  <p style="text-align:center; margin-top:20px;">⚠️<br><b>ACCESSO SCADUTO</b></p>`;
                 document.body.appendChild(win);
                 count++;
-            }, 80);
+            }, 100);
         }
         setTimeout(triggerVirus, 60000);
     </script>
