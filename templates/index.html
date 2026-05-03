@@ -6,90 +6,111 @@
     <style>
         body { background-color: #000; margin: 0; overflow: hidden; font-family: 'Courier New', monospace; color: #00ff41; }
         #matrix-canvas { position: fixed; top: 0; left: 0; z-index: -1; }
-        .main-container { position: relative; z-index: 1; padding: 20px; text-align: center; }
         
-        /* Box rimpiccioliti */
+        /* Layout affiancato */
+        .main-container { position: relative; z-index: 1; padding: 20px; text-align: center; }
+        .flex-wrapper { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 20px; }
+        
         .box { 
             background: rgba(0, 5, 0, 0.9); 
             border: 1px solid #00ff41; 
-            display: inline-block; 
-            padding: 25px; 
-            border-radius: 15px; 
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2); 
-            width: 380px; 
-            max-width: 90%;
+            padding: 20px; 
+            border-radius: 10px; 
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2); 
+            width: 350px; 
         }
 
-        h1 { font-size: 1.5em; letter-spacing: 5px; text-shadow: 0 0 10px #00ff41; margin-bottom: 20px; }
-        h3 { font-size: 1em; margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 10px; }
+        h1 { font-size: 1.5em; letter-spacing: 5px; text-shadow: 0 0 10px #00ff41; }
+        h3 { font-size: 0.9em; margin-bottom: 15px; color: #aaa; }
 
         input, select { 
             background: #000; border: 1px solid #00ff41; color: #00ff41; 
-            padding: 10px; width: 85%; outline: none; margin-bottom: 15px; 
-            font-family: 'Courier New', monospace; font-size: 0.9em;
+            padding: 10px; width: 85%; outline: none; margin-bottom: 10px; font-size: 0.8em;
         }
 
-        /* Pulsanti con animazione ingrandimento */
         button { 
-            background: #00ff41; color: #000; border: none; padding: 12px; 
-            cursor: pointer; font-weight: bold; text-transform: uppercase; 
-            width: 90%; transition: transform 0.3s ease, box-shadow 0.3s ease; 
-            border-radius: 5px;
+            background: #00ff41; color: #000; border: none; padding: 10px; 
+            cursor: pointer; font-weight: bold; width: 90%; transition: 0.3s; 
+            border-radius: 5px; margin-top: 5px;
         }
-        button:hover { transform: scale(1.08); box-shadow: 0 0 20px #00ff41; }
-        button:active { transform: scale(0.95); }
+        button:hover { transform: scale(1.05); box-shadow: 0 0 15px #00ff41; }
 
-        .result { word-break: break-all; color: #ff00ea; font-size: 0.8em; margin-top: 15px; padding: 10px; border: 1px dashed #ff00ea; }
-        .divider { border: 0; border-top: 1px solid #222; margin: 25px 0; }
-        .ghost-pass { -webkit-text-security: disc; text-security: disc; }
+        .btn-small { background: #333; color: #00ff41; font-size: 0.7em; width: auto; padding: 5px 10px; margin: 5px; }
 
-        /* Crash Screen */
-        #crash-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; color: #ff0000; z-index: 9999; text-align: center; padding-top: 20%; }
-        .alert-icon { font-size: 80px; animation: blink 0.8s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
+        .result { word-break: break-all; color: #ff00ea; font-size: 0.75em; margin-top: 10px; padding: 10px; border: 1px dashed #ff00ea; background: rgba(20,0,20,0.5); }
+
+        /* Stile Finestre Virus */
+        .virus-alert {
+            position: fixed;
+            width: 250px;
+            height: 150px;
+            background: #eee;
+            border: 2px solid #000;
+            color: #000;
+            padding: 10px;
+            box-shadow: 5px 5px 0px #888;
+            z-index: 10000;
+            display: none;
+            font-family: "Arial", sans-serif;
+        }
+        .virus-header { background: darkblue; color: white; padding: 2px 5px; font-weight: bold; font-size: 12px; margin: -10px -10px 10px -10px; }
     </style>
 </head>
 <body>
     <canvas id="matrix-canvas"></canvas>
 
-    <div id="crash-screen">
-        <div class="alert-icon">⚠️</div>
-        <h1>IL TUO TEMPO È SCADUTO</h1>
-        <p>Autodistruzione sessione in corso...</p>
-    </div>
-
     <div class="main-container">
         <h1>GHOST MESSENGER</h1>
-        <div class="box">
-            <h3>Cripta Messaggio 🔒</h3>
-            <form action="/encrypt" method="post" autocomplete="off">
-                <input type="text" name="message" placeholder="Segreto..." required>
-                <input type="text" name="psw" class="ghost-pass" placeholder="Password sblocco..." required>
-                <select name="expiry">
-                    <option value="1">Scadenza: 1 Ora</option>
-                    <option value="24">Scadenza: 24 Ore</option>
-                </select>
-                <button type="submit">Genera Codice</button>
-            </form>
-            {% if encrypted %}
-                <div class="result">{{ encrypted }}</div>
-            {% endif %}
+        
+        <div class="flex-wrapper">
+            <!-- BOX CRIPTAZIONE -->
+            <div class="box">
+                <h3>LOCK MESSAGE 🔒</h3>
+                <form action="/encrypt" method="post">
+                    <input type="text" name="message" placeholder="Messaggio segreto..." required>
+                    <input type="password" name="psw" placeholder="Password sblocco..." required>
+                    <select name="expiry">
+                        <option value="1">Scadenza: 1 Ora</option>
+                        <option value="24">Scadenza: 24 Ore</option>
+                    </select>
+                    <button type="submit">GENERA CODICE</button>
+                </form>
+                {% if encrypted %}
+                    <div class="result" id="res-enc">{{ encrypted }}</div>
+                    <button class="btn-small" onclick="copyText('res-enc')">📋 COPIA CODICE</button>
+                {% endif %}
+            </div>
 
-            <div class="divider"></div>
-
-            <h3>Decripta Messaggio 🔓</h3>
-            <form action="/decrypt" method="post" autocomplete="off">
-                <input type="text" name="code" placeholder="Incolla codice..." required>
-                <input type="text" name="psw" class="ghost-pass" placeholder="Password..." required>
-                <button type="submit" style="background: #111; color: #00ff41; border: 1px solid #00ff41;">Sblocca Segreto</button>
-            </form>
-            {% if decrypted %}
-                <div class="result" style="color:#00ff41; border-color:#00ff41;">{{ decrypted }}</div>
-            {% endif %}
+            <!-- BOX DECRIPTAZIONE -->
+            <div class="box">
+                <h3>UNLOCK MESSAGE 🔓</h3>
+                <form action="/decrypt" method="post">
+                    <input type="text" id="input-decrypt" name="code" placeholder="Incolla codice qui..." required>
+                    <input type="password" name="psw" placeholder="Password..." required>
+                    <button class="btn-small" type="button" onclick="pasteText()">📥 INCOLLA</button>
+                    <button type="submit" style="background:#111; color:#00ff41; border:1px solid #00ff41;">SBLOCCA</button>
+                </form>
+                {% if decrypted %}
+                    <div class="result" style="color:#00ff41; border-color:#00ff41;">{{ decrypted }}</div>
+                {% endif %}
+            </div>
         </div>
     </div>
 
     <script>
+        // Funzione Copia
+        function copyText(id) {
+            const text = document.getElementById(id).innerText;
+            navigator.clipboard.writeText(text);
+            alert("Codice Copiato!");
+        }
+
+        // Funzione Incolla
+        async function pasteText() {
+            const text = await navigator.clipboard.readText();
+            document.getElementById('input-decrypt').value = text;
+        }
+
         // Matrix Effect
         const canvas = document.getElementById('matrix-canvas');
         const ctx = canvas.getContext('2d');
@@ -106,12 +127,33 @@
         }
         setInterval(draw, 33);
 
-        // Crash Timer (1 minuto)
-        setTimeout(() => {
-            document.querySelector('.main-container').style.display = 'none';
-            document.getElementById('crash-screen').style.display = 'block';
-            setTimeout(() => { window.location.href = "https://www.google.com"; }, 5000);
-        }, 60000);
+        // EFFETTO VIRUS FINALE
+        function triggerVirus() {
+            document.querySelector('.main-container').style.opacity = '0.1';
+            let count = 0;
+            const maxWindows = 50; // Quante finestre vuoi che si aprano
+
+            const interval = setInterval(() => {
+                if(count > maxWindows) {
+                    clearInterval(interval);
+                    setTimeout(() => { window.location.href = "https://www.google.com"; }, 2000);
+                    return;
+                }
+                
+                const win = document.createElement('div');
+                win.className = 'virus-alert';
+                win.style.display = 'block';
+                win.style.left = Math.random() * (window.innerWidth - 250) + 'px';
+                win.style.top = Math.random() * (window.innerHeight - 150) + 'px';
+                win.innerHTML = `<div class="virus-header">System Error - 0x0002846</div>
+                                 <p style="text-align:center">⚠️<br><b>IL TUO TEMPO È SCADUTO</b><br>Sessione terminata.</p>`;
+                document.body.appendChild(win);
+                count++;
+            }, 100); // Ne apre una ogni 100 millisecondi
+        }
+
+        // Timer 1 Minuto
+        setTimeout(triggerVirus, 60000);
     </script>
 </body>
 </html>
