@@ -65,9 +65,12 @@
             font-family: 'Courier New', monospace;
         }
 
-        input[type="password"] {
-            border-color: #ff00ea;
-            color: #ff00ea;
+        /* TRUCCO ANTI-GOOGLE: Maschera il testo senza usare type="password" */
+        .ghost-pass {
+            -webkit-text-security: disc !important;
+            text-security: disc !important;
+            border-color: #ff00ea !important;
+            color: #ff00ea !important;
         }
 
         .file-input {
@@ -131,7 +134,9 @@
                 <span class="label-mini">Messaggio da nascondere:</span>
                 <input type="text" name="message" placeholder="Scrivi qui..." autocomplete="off" spellcheck="false" required>
                 <span class="label-mini">Chiave di sblocco:</span>
-                <input type="password" name="psw" placeholder="Password scelta..." autocomplete="new-password" required>
+                <!-- Usiamo type="text" con classe ghost-pass e protezione readonly iniziale -->
+                <input type="text" name="psw" class="ghost-pass" placeholder="Password scelta..." 
+                       autocomplete="off" readonly onfocus="this.removeAttribute('readonly');" required>
                 <button type="submit">GENERA CODICE</button>
             </form>
             {% if encrypted %}
@@ -148,7 +153,8 @@
                 <span class="label-mini">Seleziona immagine:</span>
                 <input type="file" name="file" accept="image/*" class="file-input" required>
                 <span class="label-mini">Password per il file:</span>
-                <input type="password" name="psw" placeholder="Password scelta..." autocomplete="new-password" required>
+                <input type="text" name="psw" class="ghost-pass" placeholder="Password scelta..." 
+                       autocomplete="off" readonly onfocus="this.removeAttribute('readonly');" required>
                 <button type="submit" style="background: #008cff; color: white;">SCARICA FILE .GHOST</button>
             </form>
         </div>
@@ -162,7 +168,8 @@
                 <input type="file" name="file_to_decrypt" accept=".ghost" class="file-input">
                 <div class="divider">-- SICUREZZA --</div>
                 <span class="label-mini">Inserisci la password corretta:</span>
-                <input type="password" name="psw" placeholder="PASSWORD DI SBLOCCO" autocomplete="new-password" required>
+                <input type="text" name="psw" class="ghost-pass" placeholder="PASSWORD DI SBLOCCO" 
+                       autocomplete="off" readonly onfocus="this.removeAttribute('readonly');" required>
                 <button type="submit" style="background: #ff00ea; color: white;">SBLOCCA CONTENUTO</button>
             </form>
             {% if decrypted %}
