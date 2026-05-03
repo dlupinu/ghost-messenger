@@ -1,69 +1,234 @@
-<!-- ... (Mantieni lo stile Matrix e il CSS di prima) ... -->
-
-<div class="main-container">
-    <div class="title-header"><h1>GHOST MESSENGER 👻</h1></div>
-
-    <!-- SEZIONE 1: SOLO TESTO (VERDE) -->
-    <div class="box" style="border-color: #00ff41;">
-        <h3 style="color: #00ff41;">MESSAGGI DI TESTO 📝</h3>
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <title>Ghost Messenger | Matrix Edition</title>
+    <style>
+        body { 
+            background-color: #000; 
+            margin: 0; 
+            overflow-x: hidden; 
+            font-family: 'Courier New', monospace;
+            transition: opacity 0.2s;
+        }
         
-        <!-- Cripta -->
-        <form action="/text_encrypt" method="post">
-            <input type="text" name="message" placeholder="Messaggio da nascondere..." required>
-            <button type="submit">GENERA CODICE ROSA</button>
-        </form>
-        {% if encrypted_text %}
-            <div class="result">
-                <span id="copyTarget">{{ encrypted_text }}</span><br>
-                <button type="button" class="copy-btn" onclick="copyText()">📑 COPIA</button>
+        #matrix-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            z-index: -1;
+        }
+
+        .main-container {
+            position: relative;
+            z-index: 1;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .title-header {
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #00ff41;
+            display: inline-block;
+            padding: 10px 40px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
+        }
+
+        h1 { color: #00ff41; text-shadow: 0 0 8px #00ff41; margin: 0; letter-spacing: 5px; font-size: 1.5em; }
+
+        .flex-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .box { 
+            background: rgba(0, 0, 0, 0.9); 
+            border: 2px solid #00ff41; 
+            padding: 20px; 
+            border-radius: 15px; 
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2); 
+            width: 380px;
+            min-height: 500px;
+        }
+
+        input, select { 
+            background: #000; 
+            border: 1px solid #333; 
+            color: #00ff41; 
+            padding: 12px; 
+            width: 90%; 
+            outline: none; 
+            margin-bottom: 10px;
+            font-family: 'Courier New', monospace;
+        }
+
+        input:focus { border-color: #00ff41; }
+
+        .ghost-pass {
+            -webkit-text-security: disc !important;
+            text-security: disc !important;
+            border-color: #ff00ea !important;
+            color: #ff00ea !important;
+        }
+
+        button { 
+            background: #00ff41; color: #000; border: none; padding: 12px 25px; 
+            cursor: pointer; font-weight: bold; transition: 0.3s;
+            text-transform: uppercase; width: 100%; margin-top: 5px;
+        }
+
+        button:hover { background: #000; color: #00ff41; box-shadow: 0 0 15px #00ff41; border: 1px solid #00ff41; }
+
+        .result { 
+            word-break: break-all; color: #ff00ea; background: rgba(20, 20, 20, 0.95); 
+            padding: 15px; margin-top: 15px; border: 1px solid #ff00ea; font-size: 0.8em;
+            box-shadow: 0 0 10px rgba(255, 0, 234, 0.3);
+        }
+
+        .panic-btn {
+            position: fixed;
+            bottom: 20px; right: 20px;
+            width: 50px; height: 50px;
+            background: #ff0000;
+            color: white;
+            border-radius: 50%;
+            border: 2px solid white;
+            font-size: 0.6em;
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        .copy-btn { background: #ff00ea; color: white; padding: 5px 10px; width: auto; font-size: 0.7em; margin-top: 10px; }
+        
+        h3 { margin-top: 0; font-size: 1.1em; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .label-mini { color: #888; font-size: 0.7em; text-align: left; display: block; margin-bottom: 5px; margin-top: 10px;}
+        .divider { border: 0; border-top: 1px solid #333; margin: 20px 0; }
+    </style>
+</head>
+<body id="main-body">
+
+    <canvas id="matrix-canvas"></canvas>
+    <button class="panic-btn" onclick="panicMode()">PANIC<br>ESC</button>
+
+    <div class="main-container">
+        <div class="title-header">
+            <h1>GHOST MESSENGER 👻</h1>
+        </div>
+
+        <div class="flex-container">
+            
+            <div class="box" style="border-color: #00ff41;">
+                <h3 style="color: #00ff41;">MESSAGGI DI TESTO 📝</h3>
+                
+                <form action="/text_encrypt" method="post" autocomplete="off">
+                    <span class="label-mini">Scrivi il segreto:</span>
+                    <input type="text" name="message" placeholder="..." required>
+                    <button type="submit">GENERA CODICE ROSA</button>
+                </form>
+
+                {% if encrypted_text %}
+                <div class="result">
+                    <span id="copyTarget">{{ encrypted_text }}</span><br>
+                    <button type="button" class="copy-btn" onclick="copyText()">📑 COPIA CODICE</button>
+                </div>
+                {% endif %}
+
+                <div class="divider"></div>
+
+                <form action="/text_decrypt" method="post" autocomplete="off">
+                    <span class="label-mini">Incolla codice rosa:</span>
+                    <input type="text" name="code" placeholder="Incolla qui...">
+                    <button type="submit" style="background: #333; color: #00ff41; border: 1px solid #00ff41;">SBLOCCA TESTO</button>
+                </form>
+
+                {% if decrypted_text %}
+                <div class="result" style="color: #00ff41; border-color: #00ff41;">
+                    <strong>RISULTATO:</strong><br>{{ decrypted_text }}
+                </div>
+                {% endif %}
             </div>
-        {% endif %}
 
-        <hr style="border: 0.5px solid #333; margin: 20px 0;">
+            <div class="box" style="border-color: #008cff;">
+                <h3 style="color: #008cff;">IMMAGINI GHOST 🖼️</h3>
+                
+                <form action="/img_hide" method="post" enctype="multipart/form-data" autocomplete="off">
+                    <span class="label-mini">1. Seleziona foto (JPG/PNG):</span>
+                    <input type="file" name="cover_img" accept="image/*" required>
+                    <span class="label-mini">2. Messaggio da nascondere:</span>
+                    <input type="text" name="hidden_msg" placeholder="..." required>
+                    <span class="label-mini">3. Password della foto:</span>
+                    <input type="text" name="psw" class="ghost-pass" placeholder="Password..." readonly onfocus="this.removeAttribute('readonly');" required>
+                    <button type="submit" style="background: #008cff; color: white;">CREA FOTO GHOST</button>
+                </form>
 
-        <!-- Decripta -->
-        <form action="/text_decrypt" method="post">
-            <input type="text" name="code" placeholder="Incolla codice rosa...">
-            <button type="submit" style="background: #555; color: white;">LEGGI TESTO</button>
-        </form>
-        {% if decrypted_text %}
-            <div class="result" style="color: #00ff41;">{{ decrypted_text }}</div>
-        {% endif %}
+                <div class="divider"></div>
+
+                <form action="/img_reveal" method="post" enctype="multipart/form-data" autocomplete="off">
+                    <span class="label-mini">Carica la Foto Ghost ricevuta:</span>
+                    <input type="file" name="ghost_img" accept="image/png" required>
+                    <span class="label-mini">Inserisci Password:</span>
+                    <input type="text" name="psw" class="ghost-pass" placeholder="Password..." readonly onfocus="this.removeAttribute('readonly');" required>
+                    <button type="submit" style="background: #ff00ea; color: white;">ESTRAI SEGRETO</button>
+                </form>
+
+                {% if decrypted_img %}
+                <div class="result" style="color: #00ff41; border-color: #00ff41;">
+                    <strong>ESTRATTO:</strong><br>{{ decrypted_img }}
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
     </div>
 
-    <!-- SEZIONE 2: SOLO IMMAGINI (BLU) -->
-    <div class="box" style="border-color: #008cff;">
-        <h3 style="color: #008cff;">IMMAGINI GHOST 🖼️</h3>
-        
-        <!-- Nascondi -->
-        <form action="/img_hide" method="post" enctype="multipart/form-data">
-            <span class="label-mini">Foto normale:</span>
-            <input type="file" name="cover_img" accept="image/*" required>
-            <input type="text" name="hidden_msg" placeholder="Messaggio segreto...">
-            <input type="text" name="psw" class="ghost-pass" placeholder="Password immagine...">
-            <button type="submit" style="background: #008cff; color: white;">CREA FOTO GHOST</button>
-        </form>
+    <script>
+        // Matrix Effect
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()";
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const drops = [];
+        for (let x = 0; x < columns; x++) drops[x] = 1;
 
-        <hr style="border: 0.5px solid #333; margin: 20px 0;">
+        function draw() {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#0F0";
+            ctx.font = fontSize + "px arial";
+            for (let i = 0; i < drops.length; i++) {
+                const text = characters.charAt(Math.floor(Math.random() * characters.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+        setInterval(draw, 33);
 
-        <!-- Estrai -->
-        <form action="/img_reveal" method="post" enctype="multipart/form-data">
-            <span class="label-mini">Carica Foto Ghost:</span>
-            <input type="file" name="ghost_img" accept="image/png" required>
-            <input type="text" name="psw" class="ghost-pass" placeholder="Password sblocco...">
-            <button type="submit" style="background: #ff00ea; color: white;">ESTRAI SEGRETO</button>
-        </form>
-        {% if decrypted_img %}
-            <div class="result" style="color: #00ff41;">{{ decrypted_img }}</div>
-        {% endif %}
-    </div>
-</div>
+        // Funzioni Utility
+        function panicMode() {
+            document.getElementById("main-body").style.opacity = "0";
+            setTimeout(() => { window.location.href = "https://www.google.it"; }, 200);
+        }
 
-<script>
-function copyText() {
-    const text = document.getElementById("copyTarget").innerText;
-    navigator.clipboard.writeText(text);
-    alert("Copiato!");
-}
-// ... (Tieni il codice del Matrix) ...
-</script>
+        window.addEventListener('keydown', (e) => { if (e.key === "Escape") panicMode(); });
+
+        function copyText() {
+            const text = document.getElementById("copyTarget").innerText;
+            navigator.clipboard.writeText(text);
+            const btn = document.querySelector(".copy-btn");
+            btn.innerText = "✅ COPIATO!";
+            setTimeout(() => { btn.innerText = "📑 COPIA CODICE"; }, 2000);
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
