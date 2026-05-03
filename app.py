@@ -1,73 +1,68 @@
 import os
 import base64
+import hashlib
 from flask import Flask, render_template, request, send_file
 from cryptography.fernet import Fernet
 import io
 
 app = Flask(__name__)
 
-# --- CONFIGURAZIONE CHIAVE ---
-key_env = os.environ.get('CHIAVE_SEGRETA')
-key = key_env.encode() if key_env else Fernet.generate_key()
-cipher = Fernet(key)
+# --- CONFIGURAZIONE SISTEMA ---
+key_env = os.environ.get('CHIAVE_SEGRETA', 'chiave-di-backup-molto-lunga')
+
+def get_cipher(user_psw):
+    # Uniamo la chiave di sistema alla password dell'utente per massima sicurezza
+    combined = (key_env + user_psw).encode()
+    hash_key = hashlib.sha256(combined).digest()
+    fernet_key = base64.urlsafe_b64encode(hash_key)
+    return Fernet(fernet_key)
 
 @app.route('/')
 def home():
     return render_template('index.html')
 
-# --- 1. GESTIONE TESTO (Copia/Incolla) ---
+# --- CRIPTA TESTO ---
 @app.route('/encrypt', methods=['POST'])
 def encrypt_msg():
     msg = request.form.get('message', '')
-    if msg:
+    psw = request.form.get('psw', '') # Password scelta dall'utente
+    if msg and psw:
+        cipher = get_cipher(psw)
         encrypted = cipher.encrypt(msg.encode()).decode()
         return render_template('index.html', encrypted=encrypted)
     return render_template('index.html')
 
-# --- 2. GESTIONE FILE (Download .ghost) ---
+# --- CRIPTA FILE ---
 @app.route('/encrypt_file', methods=['POST'])
 def encrypt_file():
     file = request.files.get('file')
-    if file:
-        file_data = file.read()
-        # Criptiamo i byte originali
-        encrypted_data = cipher.encrypt(file_data)
-        
-        # Inviamo il file criptato come download
-        return send_file(
-            io.BytesIO(encrypted_data),
-            mimetype='application/octet-stream',
-            as_attachment=True,
-            download_name="messaggio_segreto.ghost"
-        )
+    psw = request.form.get('psw', '')
+    if file and psw:
+        cipher = get_cipher(psw)
+        encrypted_data = cipher.encrypt(file.read())
+        return send_file(io.BytesIO(encrypted_data), as_attachment=True, download_name="segreto.ghost")
     return render_template('index.html')
 
-# --- 3. DECRIPTA TUTTO (Testo o File) ---
+# --- DECRIPTA TUTTO ---
 @app.route('/decrypt', methods=['POST'])
 def decrypt_msg():
-    # Prova prima a vedere se l'utente ha caricato un file .ghost
-    file = request.files.get('file_to_decrypt')
+    psw = request.form.get('psw', '')
     code = request.form.get('code', '')
+    file = request.files.get('file_to_decrypt')
+    
+    if not psw:
+        return render_template('index.html', decrypted="ERRORE: Inserisci la password!")
 
     try:
+        cipher = get_cipher(psw)
         if file and file.filename != '':
-            # Decripta il FILE
-            encrypted_data = file.read()
-            decrypted_data = cipher.decrypt(encrypted_data)
-            return send_file(
-                io.BytesIO(decrypted_data),
-                mimetype='application/octet-stream',
-                as_attachment=True,
-                download_name="file_sbloccato.png" # Puoi rinominarlo dopo
-            )
-        
+            decrypted_data = cipher.decrypt(file.read())
+            return send_file(io.BytesIO(decrypted_data), as_attachment=True, download_name="sbloccato.png")
         elif code:
-            # Decripta il TESTO (Base64)
-            decrypted_data = cipher.decrypt(code.encode()).decode()
-            return render_template('index.html', decrypted=decrypted_data)
-            
-    except Exception as e:
-        return render_template('index.html', decrypted="ERRORE: Chiave errata o file corrotto!")
+            decrypted_text = cipher.decrypt(code.encode()).decode()
+            return render_template('index.html', decrypted=decrypted_text)
+    except Exception:
+        return render_template('index.html', decrypted="ERRORE: Password errata o dati corrotti!")
     
     return render_template('index.html')
 
