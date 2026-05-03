@@ -1,101 +1,49 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <title>Ghost Messenger | Secure Text</title>
-    <style>
-        body { background-color: #000; margin: 0; overflow-x: hidden; font-family: 'Courier New', monospace; transition: opacity 0.2s; }
-        #matrix-canvas { position: fixed; top: 0; left: 0; z-index: -1; }
-        .main-container { position: relative; z-index: 1; padding: 20px; text-align: center; }
-        .title-header { background: rgba(0, 0, 0, 0.9); border: 1px solid #00ff41; display: inline-block; padding: 10px 40px; border-radius: 5px; margin-bottom: 20px; box-shadow: 0 0 15px rgba(0, 255, 65, 0.5); }
-        h1 { color: #00ff41; text-shadow: 0 0 8px #00ff41; margin: 0; letter-spacing: 5px; }
-        .box { background: rgba(0, 0, 0, 0.9); border: 2px solid #00ff41; display: inline-block; padding: 30px; border-radius: 15px; box-shadow: 0 0 20px rgba(0, 255, 65, 0.2); width: 450px; max-width: 90%; }
-        input { background: #000; border: 1px solid #333; color: #00ff41; padding: 15px; width: 90%; outline: none; margin-bottom: 15px; font-family: 'Courier New', monospace; font-size: 1em; }
-        input:focus { border-color: #00ff41; }
-        button { background: #00ff41; color: #000; border: none; padding: 15px; cursor: pointer; font-weight: bold; text-transform: uppercase; width: 100%; transition: 0.3s; }
-        button:hover { background: #000; color: #00ff41; box-shadow: 0 0 15px #00ff41; border: 1px solid #00ff41; }
-        .result { word-break: break-all; color: #ff00ea; background: rgba(20, 20, 20, 0.95); padding: 20px; margin-top: 20px; border: 1px solid #ff00ea; font-size: 0.9em; box-shadow: 0 0 10px rgba(255, 0, 234, 0.3); }
-        .panic-btn { position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px; background: #ff0000; color: white; border-radius: 50%; border: 2px solid white; font-size: 0.6em; cursor: pointer; z-index: 100; }
-        .copy-btn { background: #ff00ea; color: white; padding: 8px 15px; width: auto; font-size: 0.8em; margin-top: 10px; border: none; cursor: pointer; }
-        .divider { border: 0; border-top: 1px solid #333; margin: 30px 0; }
-        h3 { color: #00ff41; margin-top: 0; letter-spacing: 2px; }
-    </style>
-</head>
-<body id="main-body">
-    <canvas id="matrix-canvas"></canvas>
-    <button class="panic-btn" onclick="panicMode()">PANIC</button>
+<!-- ... (Mantieni head e stile Matrix dal post precedente) ... -->
 
-    <div class="main-container">
-        <div class="title-header"><h1>GHOST MESSENGER</h1></div>
-        <br>
-        <div class="box">
-            <!-- CRIPTA -->
-            <h3>CRIPTA MESSAGGIO 🔒</h3>
-            <form action="/encrypt" method="post" autocomplete="off">
-                <input type="text" name="message" placeholder="Scrivi qui il segreto..." required>
-                <button type="submit">GENERA CODICE</button>
-            </form>
+<div class="main-container">
+    <div class="title-header"><h1>GHOST MESSENGER</h1></div>
+    <br>
+    <div class="box">
+        <!-- CRIPTA -->
+        <h3>CRIPTA MESSAGGIO 🔒</h3>
+        <form action="/encrypt" method="post" autocomplete="off">
+            <input type="text" name="message" placeholder="Messaggio segreto..." required>
+            
+            <span style="color:#888; font-size:0.8em; display:block; text-align:left; margin-left:20px;">Password di sblocco:</span>
+            <input type="text" name="psw" class="ghost-pass" placeholder="Password..." required>
+            
+            <span style="color:#888; font-size:0.8em; display:block; text-align:left; margin-left:20px;">Durata messaggio:</span>
+            <select name="expiry">
+                <option value="1">Scade tra 1 ORA</option>
+                <option value="24">Scade tra 24 ORE</option>
+            </select>
+            
+            <button type="submit">GENERA CODICE</button>
+        </form>
 
-            {% if encrypted %}
-            <div class="result">
-                <span id="copyTarget">{{ encrypted }}</span><br>
-                <button type="button" class="copy-btn" onclick="copyText()">📑 COPIA</button>
-            </div>
-            {% endif %}
-
-            <div class="divider"></div>
-
-            <!-- DECRIPTA -->
-            <h3>SBLOCCA CODICE 🔓</h3>
-            <form action="/decrypt" method="post" autocomplete="off">
-                <input type="text" name="code" placeholder="Incolla il codice rosa..." required>
-                <button type="submit" style="background: #333; color: #00ff41; border: 1px solid #00ff41;">LEGGI SEGRETO</button>
-            </form>
-
-            {% if decrypted %}
-            <div class="result" style="color: #00ff41; border-color: #00ff41;">
-                <strong>MESSAGGIO:</strong><br>{{ decrypted }}
-            </div>
-            {% endif %}
+        {% if encrypted %}
+        <div class="result">
+            <span id="copyTarget">{{ encrypted }}</span><br>
+            <button type="button" class="copy-btn" onclick="copyText()">📑 COPIA</button>
         </div>
+        {% endif %}
+
+        <div class="divider"></div>
+
+        <!-- DECRIPTA -->
+        <h3>SBLOCCA CODICE 🔓</h3>
+        <form action="/decrypt" method="post" autocomplete="off">
+            <input type="text" name="code" placeholder="Incolla il codice rosa..." required>
+            <input type="text" name="psw" class="ghost-pass" placeholder="Inserisci Password..." required>
+            <button type="submit" style="background: #333; color: #00ff41; border: 1px solid #00ff41;">LEGGI SEGRETO</button>
+        </form>
+
+        {% if decrypted %}
+        <div class="result" style="color: #00ff41; border-color: #00ff41;">
+            <strong>RISULTATO:</strong><br>{{ decrypted }}
+        </div>
+        {% endif %}
     </div>
+</div>
 
-    <script>
-        const canvas = document.getElementById('matrix-canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        const characters = "01";
-        const fontSize = 16;
-        const columns = canvas.width / fontSize;
-        const drops = [];
-        for (let x = 0; x < columns; x++) drops[x] = 1;
-        function draw() {
-            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#0F0";
-            ctx.font = fontSize + "px arial";
-            for (let i = 0; i < drops.length; i++) {
-                const text = characters.charAt(Math.floor(Math.random() * characters.length));
-                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-                drops[i]++;
-            }
-        }
-        setInterval(draw, 33);
-
-        function panicMode() {
-            document.getElementById("main-body").style.opacity = "0";
-            setTimeout(() => { window.location.href = "https://www.google.it"; }, 200);
-        }
-        window.addEventListener('keydown', (e) => { if (e.key === "Escape") panicMode(); });
-
-        function copyText() {
-            const text = document.getElementById("copyTarget").innerText;
-            navigator.clipboard.writeText(text);
-            const btn = document.querySelector(".copy-btn");
-            btn.innerText = "✅ COPIATO!";
-            setTimeout(() => { btn.innerText = "📑 COPIA"; }, 2000);
-        }
-    </script>
-</body>
-</html>
+<!-- ... (Mantieni Script Matrix e Panic Mode) ... -->
