@@ -51,7 +51,7 @@
             margin: 15px; 
             width: 350px;
             vertical-align: top;
-            min-height: 300px;
+            min-height: 350px;
         }
 
         input { 
@@ -61,8 +61,14 @@
             padding: 12px; 
             width: 90%; 
             outline: none; 
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             font-family: 'Courier New', monospace;
+        }
+
+        /* Colore speciale per gli input delle password per distinguerli */
+        input[type="password"] {
+            border-color: #ff00ea;
+            color: #ff00ea;
         }
 
         .file-input {
@@ -80,6 +86,7 @@
             transition: 0.3s;
             text-transform: uppercase;
             width: 100%;
+            margin-top: 10px;
         }
 
         button:hover { 
@@ -98,12 +105,13 @@
             border: 1px solid #ff00ea; 
             font-size: 0.8em;
             box-shadow: 0 0 10px rgba(255, 0, 234, 0.3);
-            max-height: 150px;
+            max-height: 120px;
             overflow-y: auto;
         }
 
         h3 { margin-top: 0; color: #00ff41; font-size: 1.1em; border-bottom: 1px solid #00ff41; padding-bottom: 10px; }
         .divider { color: #555; margin: 10px 0; font-size: 0.8em; }
+        .label-mini { color: #888; font-size: 0.7em; text-align: left; display: block; margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -121,12 +129,15 @@
         <div class="box">
             <h3>TESTO SEGRETO 📝</h3>
             <form action="/encrypt" method="post">
-                <input type="text" name="message" placeholder="Scrivi messaggio..." required>
+                <span class="label-mini">Messaggio da nascondere:</span>
+                <input type="text" name="message" placeholder="Scrivi qui..." required>
+                <span class="label-mini">Chiave di sblocco (da ricordare!):</span>
+                <input type="password" name="psw" placeholder="Password scelta..." required>
                 <button type="submit">GENERA CODICE</button>
             </form>
-            {% if encrypted and not is_file %}
+            {% if encrypted %}
                 <div class="result">
-                    <strong>CODICE ROSA:</strong><br>{{ encrypted }}
+                    <strong>CODICE GENERATO:</strong><br>{{ encrypted }}
                 </div>
             {% endif %}
         </div>
@@ -135,25 +146,29 @@
         <div class="box">
             <h3>IMMAGINE SEGRETA 🖼️</h3>
             <form action="/encrypt_file" method="post" enctype="multipart/form-data">
-                <p style="color: #0f0; font-size: 0.8em;">Seleziona una foto:</p>
+                <span class="label-mini">Seleziona immagine:</span>
                 <input type="file" name="file" accept="image/*" class="file-input" required>
+                <span class="label-mini">Password per il file:</span>
+                <input type="password" name="psw" placeholder="Password scelta..." required>
                 <button type="submit" style="background: #008cff; color: white;">SCARICA FILE .GHOST</button>
             </form>
-            <p style="color: #555; font-size: 0.7em; margin-top: 10px;">Riceverai un file criptato da inviare.</p>
         </div>
 
         <!-- BOX 3: DECRIPTA TUTTO -->
         <div class="box">
             <h3>LEGGI SEGRETO 🔓</h3>
             <form action="/decrypt" method="post" enctype="multipart/form-data">
-                <input type="text" name="code" placeholder="Incolla codice rosa...">
-                <div class="divider">-- OPPURE CARICA FILE --</div>
+                <span class="label-mini">Codice rosa O File .ghost:</span>
+                <input type="text" name="code" placeholder="Incolla codice...">
                 <input type="file" name="file_to_decrypt" accept=".ghost" class="file-input">
-                <button type="submit" style="background: #ff00ea; color: white;">SBLOCCA</button>
+                <div class="divider">-- SICUREZZA --</div>
+                <span class="label-mini">Inserisci la password corretta:</span>
+                <input type="password" name="psw" placeholder="PASSWORD DI SBLOCCO" required>
+                <button type="submit" style="background: #ff00ea; color: white;">SBLOCCA CONTENUTO</button>
             </form>
             {% if decrypted %}
                 <div class="result" style="color: #00ff41; border-color: #00ff41;">
-                    <strong>MESSAGGIO:</strong><br>{{ decrypted }}
+                    <strong>CONTENUTO SBLOCCATO:</strong><br>{{ decrypted }}
                 </div>
             {% endif %}
         </div>
