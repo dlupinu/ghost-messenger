@@ -11,7 +11,7 @@
             overflow-x: hidden; 
             font-family: 'Courier New', monospace; 
             color: #00ff41; 
-            /* Sfondo Anonymous corretto */
+            /* Sfondo Anonymous caricato correttamente */
             background-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://wallpaperaccess.com/full/11252.jpg');
             background-size: cover;
             background-position: center;
@@ -106,7 +106,7 @@
         
         button:hover { background: #00cc33; transform: scale(1.02); box-shadow: 0 0 25px #00ff41; }
 
-        .btn-small { background: #1a1a1a; color: #00ff41; font-size: 0.9em; width: auto; padding: 10px 20px; border: 1px solid #00ff41; margin-top: 15px; }
+        .btn-small { background: #1a1a1a; color: #00ff41; font-size: 0.9em; width: auto; padding: 10px 20px; border: 1px solid #00ff41; margin-top: 15px; cursor: pointer; }
 
         .result { 
             word-break: break-all; 
@@ -136,7 +136,7 @@
     <audio id="alarm-sound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto" loop></audio>
 
     <div class="main-container">
-        <!-- HEADER SOLO CON TESCHI -->
+        <!-- HEADER SOLO CON TESCHI - NINJA RIMOSSO -->
         <div class="header-box">
             <span class="hacker-icon">💀</span>
             <h1>GHOST MESSENGER</h1>
@@ -144,6 +144,7 @@
         </div>
         
         <div class="flex-wrapper">
+            <!-- BOX CRIPTAZIONE -->
             <div class="box">
                 <h3>LOCK MESSAGE 🔒</h3>
                 <form action="/encrypt" method="post" autocomplete="off">
@@ -156,8 +157,15 @@
                     </select>
                     <button type="submit">GENERA CODICE</button>
                 </form>
+
+                <!-- QUESTA PARTE SERVE PER MOSTRARE IL CODICE -->
+                {% if encrypted %}
+                    <div class="result" id="res-enc">{{ encrypted }}</div>
+                    <button class="btn-small" onclick="copyText('res-enc')">📋 COPIA CODICE</button>
+                {% endif %}
             </div>
 
+            <!-- BOX DECRIPTAZIONE -->
             <div class="box">
                 <h3>UNLOCK MESSAGE 🔓</h3>
                 <form action="/decrypt" method="post" autocomplete="off">
@@ -167,6 +175,11 @@
                     <button type="submit" style="background:#111; color:#00ff41; border:2px solid #00ff41;">SBLOCCA</button>
                     <button class="btn-small" type="button" onclick="pasteText()" style="width:100%">📥 INCOLLA</button>
                 </form>
+
+                <!-- QUESTA PARTE SERVE PER MOSTRARE IL MESSAGGIO SBLOCCATO -->
+                {% if decrypted %}
+                    <div class="result" style="color:#00ff41; border-color:#00ff41;">{{ decrypted }}</div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -193,7 +206,15 @@
         }
         setInterval(draw, 35);
 
-        // Clipboard
+        // Copia il testo negli appunti
+        function copyText(id) {
+            const text = document.getElementById(id).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Codice copiato!");
+            });
+        }
+
+        // Incolla il testo dagli appunti
         async function pasteText() {
             try {
                 const text = await navigator.clipboard.readText();
@@ -201,10 +222,10 @@
             } catch (err) { alert("Incolla manualmente."); }
         }
 
-        // TRIGGER VIRUS + ALLARME
+        // TRIGGER VIRUS + ALLARME AL MINUTO SCADUTO
         function triggerVirus() {
             const alarm = document.getElementById('alarm-sound');
-            alarm.play().catch(e => console.log("Audio bloccato. Clicca sulla pagina per permettere i suoni."));
+            alarm.play().catch(e => console.log("Audio bloccato: clicca sulla pagina prima del minuto!"));
             
             document.querySelector('.main-container').style.filter = 'blur(6px)';
             let count = 0;
